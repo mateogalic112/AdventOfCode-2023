@@ -59,7 +59,7 @@ const checkIsAdjacentToSymbol = (
 };
 
 function main() {
-  const input = fs.readFileSync("input.txt", "utf8");
+  const input = fs.readFileSync("inputOne.txt", "utf8");
   const lines = input.split("\n");
 
   const result = lines.reduce((acc, line, index) => {
@@ -78,10 +78,6 @@ function main() {
     const adjacentNumbers = numberMap.map((number) => {
       return checkIsAdjacentToSymbol(number, symbols);
     });
-
-    console.log({ index });
-
-    console.log({ adjacentNumbers });
 
     const adjacentNumbersSum = adjacentNumbers.reduce((adjacentSum, number) => {
       return adjacentSum + number;

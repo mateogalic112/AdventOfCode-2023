@@ -24,21 +24,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
-const lineSymbolIndexes = (line) => {
-    if (!line)
-        return [];
-    const lineSymbols = line.match(/[^0-9.]/g);
-    if (!lineSymbols)
-        return [];
-    let linePointer = 0;
-    const lineSymbolIndexes = lineSymbols.map((symbol) => {
-        const newLinePointer = line.indexOf(symbol, linePointer);
-        linePointer = newLinePointer + 1;
-        return newLinePointer;
-    });
-    return lineSymbolIndexes;
+const findGearIndexes = (line) => {
+    return [...line.matchAll(new RegExp("\\*", "gi"))].map((result) => result.index);
 };
 const lineNumberWithStartingIndex = (line) => {
+    if (!line)
+        return [];
     const lineNumbers = line.match(/\d+/g);
     if (!lineNumbers)
         return [];
@@ -54,37 +45,40 @@ const lineNumberWithStartingIndex = (line) => {
     }));
     return numberMap;
 };
-const checkIsAdjacentToSymbol = (numberWithStartIndex, lineSymbolIndexes) => {
-    const key = Object.keys(numberWithStartIndex)[0];
-    const startingIndex = numberWithStartIndex[key];
-    const coveringIndexes = [startingIndex, startingIndex + key.length - 1];
-    const found = lineSymbolIndexes.find((symbolIdx) => symbolIdx > coveringIndexes[0] - 2 && symbolIdx < coveringIndexes[1] + 2);
-    if (typeof found !== "undefined")
-        return parseInt(key);
-    return 0;
+const checkGearMultiplier = (gearIndex, numberWithStartIndexArray) => {
+    const numberCoveringAreas = numberWithStartIndexArray.map((n) => {
+        const key = Object.keys(n)[0];
+        const startingIndex = n[key];
+        return [parseInt(key), startingIndex, startingIndex + key.length];
+    });
+    console.log({ numberCoveringAreas });
+    const foundKeys = numberCoveringAreas.filter((n) => gearIndex > n[1] - 2 && gearIndex < n[2] + 1);
+    console.log({ foundKeys });
+    console.log({ gearIndex });
+    if (foundKeys.length !== 2)
+        return 0;
+    const result = foundKeys[0][0] * foundKeys[1][0];
+    console.log({ result });
+    return result;
 };
 function main() {
-    const input = fs.readFileSync("input.txt", "utf8");
+    const input = fs.readFileSync("inputTwo.txt", "utf8");
     const lines = input.split("\n");
     const result = lines.reduce((acc, line, index) => {
-        const topLineSymbols = lineSymbolIndexes(lines[index - 1]);
-        const currentLineSymbols = lineSymbolIndexes(line);
-        const bottomLineSymbols = lineSymbolIndexes(lines[index + 1]);
-        const symbols = [
-            ...topLineSymbols,
-            ...currentLineSymbols,
-            ...bottomLineSymbols,
+        const topNumberMap = lineNumberWithStartingIndex(lines[index - 1]);
+        const currentNumberMap = lineNumberWithStartingIndex(line);
+        const bottomNumberMap = lineNumberWithStartingIndex(lines[index + 1]);
+        const numberCoveringMap = [
+            ...topNumberMap,
+            ...currentNumberMap,
+            ...bottomNumberMap,
         ];
-        const numberMap = lineNumberWithStartingIndex(line);
-        const adjacentNumbers = numberMap.map((number) => {
-            return checkIsAdjacentToSymbol(number, symbols);
-        });
-        console.log({ index });
-        console.log({ adjacentNumbers });
-        const adjacentNumbersSum = adjacentNumbers.reduce((adjacentSum, number) => {
-            return adjacentSum + number;
+        const lineGears = findGearIndexes(line);
+        const gearsSum = lineGears.reduce((gearSum, gear) => {
+            const multiplerGear = checkGearMultiplier(gear, numberCoveringMap);
+            return gearSum + multiplerGear;
         }, 0);
-        return acc + adjacentNumbersSum;
+        return acc + gearsSum;
     }, 0);
     console.log({ result });
 }
