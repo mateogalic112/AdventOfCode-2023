@@ -51,14 +51,10 @@ const checkGearMultiplier = (gearIndex, numberWithStartIndexArray) => {
         const startingIndex = n[key];
         return [parseInt(key), startingIndex, startingIndex + key.length];
     });
-    console.log({ numberCoveringAreas });
     const foundKeys = numberCoveringAreas.filter((n) => gearIndex > n[1] - 2 && gearIndex < n[2] + 1);
-    console.log({ foundKeys });
-    console.log({ gearIndex });
     if (foundKeys.length !== 2)
         return 0;
     const result = foundKeys[0][0] * foundKeys[1][0];
-    console.log({ result });
     return result;
 };
 function main() {
