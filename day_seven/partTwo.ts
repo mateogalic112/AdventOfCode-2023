@@ -57,7 +57,7 @@ const cardCheck = (hand: string) => {
   const jokers = handCheck["J"] || 0;
 
   // five of a kind
-  if (handResult.find((v) => v + jokers === 5)) {
+  if (jokers === 5 || handResult.find((v) => v + jokers === 5)) {
     return 0;
   }
 
